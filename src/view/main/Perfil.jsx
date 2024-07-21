@@ -1,26 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
 import { Button, Form } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
-function UpdateUser() {
-    const { id } = useParams();
+function Perfil() {
+    const [id, setId ] = useState('');
     const [formData, setFormData] = useState({
         name: '',
         lastname: '',
         age: '',
         email: '',
         password: '',
-        status: '',
-        datahoracadastro: ''
+        code_security: ''
     });
 
     const navigate = useNavigate();
 
-    useEffect(() => {
-        async function fetchUser() {
+    useEffect( () => {
+        async function fetchMe() {
             try {
-                const response = await fetch(`http://localhost:8082/userView/getUserById/${id}`, {
+
+                const response = await fetch(`http://localhost:8082/auth/admin`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('authToken')}`
                     }
@@ -34,19 +34,21 @@ function UpdateUser() {
                         age: data.age,
                         email: data.email,
                         password: '',
-                        status: data.status ? 'ativo' : 'inativo',  // Converte booleano para string
-                        datahoracadastro: data.datahoracadastro  // Mantém a data no formato original
+                        code_security: data.code_security
                     });
+
                 } else {
                     console.error('Erro ao carregar dados do usuário:', response.statusText);
                 }
+                
             } catch (error) {
                 console.error('Erro ao carregar dados do usuário:', error);
             }
         }
 
-        fetchUser();
+        fetchMe();
     }, [id]);
+
 
     const handleChange = (event) => {
         const { name, value } = event.target;
@@ -56,58 +58,18 @@ function UpdateUser() {
         }));
     }
 
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-        try {
-            const dataToSend = {
-                ...formData,
-                status: formData.status === 'ativo'  // Converte string para booleano
-            };
 
-            const response = await fetch(`http://localhost:8082/userView/updateUserView/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
-                },
-                body: JSON.stringify(dataToSend)
-            });
-
-            if (response.ok) {
-                navigate(-1); // Redireciona para a lista de usuários
-            } else {
-                const errorData = await response.json();
-                console.error('Erro ao atualizar dados do usuário:', response.statusText, errorData);
-            }
-        } catch (error) {
-            console.error('Erro ao tentar atualizar o usuário:', error);
-            alert('Falha ao tentar atualizar o usuário!');
-        }
-    }
-
-    // Função para formatar a data para exibição no formulário
-    const formatDateForDisplay = (dateString) => {
-        const options = {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-        };
-        return new Date(dateString).toLocaleString('pt-BR', options);
-    }
 
     return (
         <div className="container mt-3">
             <div className="d-flex justify-content-between align-items-center mb-3">
-                <h3 style={{ color: 'yellow' }}>Editar usuário</h3>
+                <h3 style={{ color: 'yellow' }}>Perfil de Usuário</h3>
                 <Link to="/admin/users" className="btn btn-primary">Voltar</Link>
             </div>
 
             <div className="container d-flex justify-content-center align-items-center mt-3">
                 <div className="container" style={{ maxWidth: '500px' }}>
-                    <Form onSubmit={handleSubmit}>
+                    <Form>
                         <Form.Group controlId="formName">
                             <Form.Label>Nome</Form.Label>
                             <Form.Control
@@ -138,25 +100,12 @@ function UpdateUser() {
                                 required
                             />
                         </Form.Group>
-                        <Form.Group controlId="formStatus">
-                            <Form.Label>Status</Form.Label>
-                            <Form.Control
-                                as="select"
-                                name="status"
-                                value={formData.status}
-                                onChange={handleChange}
-                                required
-                            >
-                                <option value="ativo">Ativo</option>
-                                <option value="inativo">Inativo</option>
-                            </Form.Control>
-                        </Form.Group>
-                        <Form.Group controlId="formDataHoraCadastro">
-                            <Form.Label>Data/hora cadastro</Form.Label>
+                        <Form.Group controlId="formCode">
+                            <Form.Label>Código de Segurança</Form.Label>
                             <Form.Control
                                 type="text"
-                                name="datahoracadastro"
-                                value={formatDateForDisplay(formData.datahoracadastro)}
+                                name="code_security"
+                                value={formData.code_security}
                                 onChange={handleChange}
                                 required
                             />
@@ -188,6 +137,7 @@ function UpdateUser() {
             </div>
         </div>
     )
-}
 
-export default UpdateUser;
+};
+
+export default Perfil;
