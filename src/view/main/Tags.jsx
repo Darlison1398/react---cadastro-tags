@@ -7,8 +7,10 @@ import { Button } from "react-bootstrap";
 
 function Tags() {
     const [tags, setTags] = useState([]);
-    const [showTag, setShowTag ] = useState(false);
+    const [showTag, setShowTag] = useState(false);
     const [tagId, setTagId] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deleteTagId, setDeleteTagId] = useState(null);
 
     useEffect(() => {
         async function fetchTags() {
@@ -22,7 +24,6 @@ function Tags() {
                 if (response.ok) {
                     const data = await response.json();
                     setTags(data);
-                    //console.log(data);
                 } else {
                     console.error('Falha ao carregar os dados:', response.statusText);
                 }
@@ -34,7 +35,7 @@ function Tags() {
         fetchTags();
     }, []);
 
-    // exibindo tag específica no modal
+    // Exibindo tag específica no modal
     function handleShowModal(tag) {
         setTagId(tag);
         setShowTag(true);
@@ -43,6 +44,39 @@ function Tags() {
     function handleCloseModal() {
         setShowTag(false);
         setTagId(null);
+    }
+
+    // Modal para confirmar e deletar tag
+    function handleDeleteTag(tagToDelete) {
+        setShowDeleteModal(true);
+        setDeleteTagId(tagToDelete);
+    }
+
+    function handleCloseDeleteModal() {
+        setShowDeleteModal(false);
+        setDeleteTagId(null);
+    }
+
+    async function confirmDeleteTag(tagToDelete) {
+        try {
+            const response = await fetch(`http://localhost:8082/tags/deletarTag/${tagToDelete}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+                }
+            });
+
+            if (response.ok) {
+                setTags(tags.filter(tag => tag.id !== tagToDelete));
+                handleCloseDeleteModal();
+            } else {
+                console.error('Falha ao excluir a tag:', response.statusText);
+            }
+
+        } catch (error) {
+            console.error('Falha ao tentar excluir a tag:', error);
+            alert('Falha ao tentar excluir a tag!');
+        }
     }
 
     return (
@@ -74,10 +108,12 @@ function Tags() {
                                     <Button variant="success" size="sm" onClick={() => handleShowModal(tag)}>
                                         <FontAwesomeIcon icon={faEye} />
                                     </Button>
-                                    <Button variant="primary" size="sm">
-                                        <FontAwesomeIcon icon={faPencil} />
-                                    </Button>
-                                    <Button variant="danger" size="sm">
+                                    <Link to={`/admin/updateTag/${tag.id}`}>
+                                        <Button variant="primary" size="sm">
+                                            <FontAwesomeIcon icon={faPencil} />
+                                        </Button>
+                                    </Link>
+                                    <Button variant="danger" size="sm" onClick={() => handleDeleteTag(tag.id)}>
                                         <FontAwesomeIcon icon={faTrash} />
                                     </Button>
                                 </td>
@@ -105,6 +141,23 @@ function Tags() {
                     <Button variant="secondary" onClick={handleCloseModal}>
                         Fechar
                     </Button>
+                }
+            />
+
+            <CustonModal
+                show={showDeleteModal}
+                handleClose={handleCloseDeleteModal}
+                title="Confirmação de Exclusão"
+                body="Você tem certeza que deseja excluir esta tag?"
+                footer={
+                    <>
+                        <Button variant="secondary" onClick={handleCloseDeleteModal}>
+                            Cancelar
+                        </Button>
+                        <Button variant="danger" onClick={() => confirmDeleteTag(deleteTagId)}>
+                            Excluir
+                        </Button>
+                    </>
                 }
             />
         </div>

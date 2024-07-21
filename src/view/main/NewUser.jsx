@@ -48,6 +48,7 @@ function NewUser() {
                 setEmail('');
                 setPassword('');
                 navigate('/admin/users'); 
+                
             } else {
                 console.error('Erro inesperado:', response.status);
             }

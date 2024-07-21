@@ -9,6 +9,7 @@ import NewUser from "./NewUser";
 import UpdateUser from "./UpdateUser";
 import Perfil from "./Perfil";
 import NewTag from "./NewTag";
+import UpdateTag from "./UpdateTag";
 
 function Admin() {
     return (
@@ -23,6 +24,7 @@ function Admin() {
                 <Route path="updateUser/:id" element={<UpdateUser />} />
                 <Route path="perfil" element={<Perfil />} />
                 <Route path="newTag" element={<NewTag />} />
+                <Route path="updateTag/:id" element={<UpdateTag />} />
             </Routes>
         </div>
     );

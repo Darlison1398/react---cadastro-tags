@@ -71,7 +71,6 @@ function Users() {
             const response = await fetch(`http://localhost:8082/userView/deleteUserView/${userId}`, {
                 method: 'DELETE',
                 headers: {
-                    //'Authorization': 'Bearer ' + localStorage.getItem('authToken')
                     'Authorization': `Bearer ${localStorage.getItem('authToken')}`
                 }
             });
